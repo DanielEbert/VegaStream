@@ -3,6 +3,7 @@ from __future__ import annotations
 import socketio
 import eventlet
 import json
+import random
 
 spec = {
     "$schema": "https://vega.github.io/schema/vega-lite/v5.15.1.json",
@@ -47,18 +48,18 @@ spec = {
 def main() -> int:
     sio = socketio.Server(cors_allowed_origins='*')
 
-    client_ids = set()
+    client_ids = {}
 
     @sio.event
     def connect(sid, environ, auth):
         print('connect ', sid)
-        client_ids.add(sid)
+        client_ids[sid] = {'next_t': 0}
 
     @sio.event
     def disconnect(sid):
         print('disconnect ', sid)
-        client_ids.remove(sid)
-    
+        del client_ids[sid]
+
     @sio.event
     def register_for_plot(sid, data):
         print('register_for_plot', sid, data)
@@ -75,13 +76,16 @@ def main() -> int:
             }
         )
 
-    @sio.on('*')
-    def on_any_event(event, sid, data):
-        print(event, sid, data)
-        sio.emit('newData', 'huu', room=sid)
-        return 'my-callback'
+    def send_new_data():
+        while True:
+            for sid, sid_data in client_ids.items():
+                # TODO: later get new data from queue, check if anyone needs it, and send only to that person
+                sio.emit('newData', json.dumps([{ 'x': random.uniform(0, 10), 'y': random.uniform(0, 10), 't': sid_data['next_t']}]), room=sid)
+                sid_data['next_t'] += 1
+            eventlet.sleep(0.03)
 
     app = socketio.WSGIApp(sio)
+    eventlet.spawn(send_new_data)
     eventlet.wsgi.server(eventlet.listen(('', 8000)), app)
 
 
