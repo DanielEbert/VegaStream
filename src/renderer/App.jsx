@@ -2,115 +2,13 @@ import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import embed from 'vega-embed';
+import { socket } from './socket';
 
 let counter = 0;
 
 function VegaPlot() {
-  const spec = {
-    $schema: 'https://vega.github.io/schema/vega-lite/v5.15.1.json',
-    config: {
-      view: {
-        continuousHeight: 1000,
-        continuousWidth: 1000,
-      },
-    },
-    layer: [
-      {
-        data: {
-          name: 'source',
-        },
-        encoding: {
-          x: {
-            field: 'x',
-            type: 'quantitative',
-          },
-          y: {
-            field: 'y',
-            type: 'quantitative',
-          },
-        },
-        mark: {
-          type: 'point',
-        },
-        name: 'view_15',
-        transform: [
-          {
-            filter: 'datum.t > filterStart',
-          },
-        ],
-      },
-      {
-        data: {
-          name: 'sourceb',
-        },
-        encoding: {
-          x: {
-            field: 'a',
-            type: 'quantitative',
-          },
-          y: {
-            field: 'b',
-            type: 'quantitative',
-            scale: { domain: [0, { expr: 'domainWidth' }] },
-          },
-        },
-        mark: {
-          color: 'red',
-          type: 'point',
-        },
-        name: 'view_16',
-      },
-    ],
-    params: [
-      {
-        name: 'domainWidth',
-        value: 10,
-        bind: {
-          input: 'range',
-          min: 1,
-          max: 20,
-          step: 1,
-          name: 'Domain Width ',
-        },
-      },
-      {
-        name: 'filterStart',
-        value: 100,
-      }
-      //   {
-      //     bind: 'scales',
-      //     name: 'param_25',
-      //     select: {
-      //       encodings: ['x', 'y'],
-      //       type: 'interval',
-      //     },
-      //     views: ['view_15'],
-      //   },
-      //   {
-      //     bind: 'scales',
-      //     name: 'param_26',
-      //     select: {
-      //       encodings: ['x', 'y'],
-      //       type: 'interval',
-      //     },
-      //     views: ['view_16'],
-      //   },
-    ],
-  };
-
-  // TODO: use view.signal('domainWidth', newValue).run();
-
-  const initialData = {
-    source: [
-      { x: 1, y: 3, t: 0 },
-      { x: 2, y: 2, t: 0 },
-      { x: 3, y: 1, t: 0 },
-      { x: 4, y: 4, t: 0 },
-      { x: 5, y: 5, t: 0 },
-    ],
-  };
-
   const ref = useRef();
+  const [specAndData, setSpecAndData] = useState(null);
   const [view, setView] = useState(null);
   const [paused, setPaused] = useState(false);
 
@@ -122,7 +20,7 @@ function VegaPlot() {
       // console.log(counter)
 
       let newData = [];
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < 1; i++) {
         const elem = JSON.stringify({
           x: Math.random() * 10,
           y: Math.random() * 10,
@@ -142,7 +40,7 @@ function VegaPlot() {
       // await view.insert('sourceb', newDataB).run();
     };
 
-    const intervalId = setInterval(updateData, 10);
+    const intervalId = setInterval(updateData, 30);
 
     return () => {
       clearInterval(intervalId);
@@ -150,9 +48,11 @@ function VegaPlot() {
   }, [view, paused]);
 
   useEffect(() => {
-    embed(ref.current, spec, { actions: false }).then(({ view }) => {
+    if (specAndData == null) return;
+
+    embed(ref.current, specAndData.spec, { actions: false }).then(({ view }) => {
       setView(view);
-      view.insert('source', initialData.source).run();
+      view.insert('source', specAndData.data).run();
     });
 
     return () => {
@@ -160,6 +60,32 @@ function VegaPlot() {
         view.finalize();
       }
     };
+  }, [specAndData]);
+
+  // TODO: likely handle disconnect and on reconnect ask for current status again
+
+  useEffect(() => {
+    socket.emit('register_for_plot', ('features', {"config": 0}), (response_str) => {
+      const response = JSON.parse(response_str);
+      console.log(response)
+      setSpecAndData({spec: response.spec, data: response.initial_data});
+    });
+
+    function onNewData(data) {
+      console.log('onNewData ' + data);
+    }
+
+    function onNewData2(data) {
+      console.log('onNewData2 ' + data);
+    }
+
+    socket.on('newData', onNewData);
+    socket.on('newData', onNewData2);
+
+    return () => {
+      socket.off('newData', onNewData);
+      socket.off('newData', onNewData2);
+    }
   }, []);
 
   return (
@@ -179,6 +105,26 @@ function Main() {
 }
 
 export default function App() {
+
+  const [isConnected, setIsConnected] = useState(socket.connected);
+
+  useEffect(() => {
+    function onConnect() {
+      setIsConnected(true);
+    }
+    function onDisconnect() {
+      setIsConnected(false);
+    }
+
+    socket.on('connect', onConnect);
+    socket.on('disconnect', onDisconnect);
+
+    return () => {
+      socket.off('connect', onConnect);
+      socket.off('disconnect', onDisconnect);
+    }
+  }, []);
+
   return (
     <Router>
       <Routes>
