@@ -10,3 +10,7 @@ export function convertMilliseconds(ms) {
 
   return `${paddedMinutes}:${paddedSeconds}:${paddedMs}`;
 }
+
+export function convertToMilliseconds(ms_str) {
+  
+}
