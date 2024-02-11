@@ -17,7 +17,7 @@ import { FiChevronLeft } from 'react-icons/fi';
 import { FiPlay } from 'react-icons/fi';
 import { FiPauseCircle } from 'react-icons/fi';
 import { IconButton } from './ui/IconButton';
-import { convertMilliseconds } from './util';
+import { convertMilliseconds, convertToMilliseconds } from './util';
 
 let counter = 0;
 
@@ -107,27 +107,15 @@ function Main({ connected }) {
     );
   };
 
-  const handleFinalizeTimestampTextInput = (t) => {
-    if (!/^[\d:]+$/.test(t)) {
+  const handleFinalizeTimestampTextInput = (time_str) => {
+    if (!/^[\d:]+$/.test(time_str)) {
       console.error(
         'Timestamp Text Input has invalid format. Format must be MM:SS:MS or MS.'
       );
       return;
     }
 
-    let timestampSeconds = null;
-    const timestampParts = t.split(':');
-    if (timestampParts.length == 1) {
-      timestampSeconds = parseInt(timestampParts[0]);
-    } else if (timestampParts.length == 2) {
-      timestampSeconds =
-        parseInt(timestampParts[0] * 1000) + parseInt(timestampParts[1]);
-    } else {
-      timestampSeconds =
-        parseInt(timestampParts[timestampParts.length - 3]) * 1000 * 60 +
-        parseInt(timestampParts[timestampParts.length - 2]) * 1000 +
-        parseInt(timestampParts[timestampParts.length - 1]);
-    }
+    let timestampSeconds = convertToMilliseconds(time_str);
 
     const endTimestamp = Math.min(
       Math.max(timestampSeconds, minTimestamp),
@@ -206,31 +194,44 @@ function Main({ connected }) {
             label={'+1 Sec'}
             onClick={() => changeTimestamp(1000)}
           />
-          <span className="ml-5 select-none align-text-bottom">
-            {/* textbox for selected timestamp */}
-            {convertMilliseconds(selectedTimestamp[0]) + ' - '}
-            &nbsp;
-          </span>
-          <input
-            min={minTimestamp}
-            max={maxTimestamp}
-            value={textInputTimestamp}
-            onChange={(e) => {
-              setTextInputTimestamp(e.target.value);
-            }}
-            onKeyDown={(e) =>
-              e.key === 'Enter' &&
-              handleFinalizeTimestampTextInput(e.target.value)
-            }
-            onBlur={(e) => handleFinalizeTimestampTextInput(e.target.value)}
-            size={9}
-            className="bg-gray-50 px-1 border border-gray-300 rounded-lg outline-none  focus:border-blue-500"
-          />
-          {/*convertMilliseconds(selectedTimestamp[1])*/}
-          <span className="select-none">
-            &nbsp;
-            {' / ' + convertMilliseconds(maxTimestamp)}
-          </span>
+          <div className="ml-5 group relative justify-center flex">
+            <span className="hidden group-hover:block absolute -top-10 whitespace-nowrap">
+              {selectedTimestamp[0] + " ms"}
+            </span>
+            <span className="select-none">
+              {convertMilliseconds(selectedTimestamp[0])}
+            </span>
+          </div>
+          <span>&nbsp; {'-'} &nbsp;</span>
+          <div className="group relative justify-center flex">
+            <span className="hidden group-hover:block absolute -top-10 whitespace-nowrap">
+              {convertToMilliseconds(textInputTimestamp) + " ms"}
+            </span>
+            <input
+              min={minTimestamp}
+              max={maxTimestamp}
+              value={textInputTimestamp}
+              onChange={(e) => {
+                setTextInputTimestamp(e.target.value);
+              }}
+              onKeyDown={(e) =>
+                e.key === 'Enter' &&
+                handleFinalizeTimestampTextInput(e.target.value)
+              }
+              onBlur={(e) => handleFinalizeTimestampTextInput(e.target.value)}
+              size={9}
+              className="bg-gray-50 px-1 border border-gray-300 rounded-lg outline-none  focus:border-blue-500"
+            />
+          </div>
+          <span>&nbsp; {'/'} &nbsp;</span>
+          <div className="group relative justify-center flex">
+            <span className="hidden group-hover:block absolute -top-10 whitespace-nowrap">
+              {maxTimestamp + " ms"}
+            </span>
+            <span className="select-none">
+              {convertMilliseconds(maxTimestamp)}
+            </span>
+          </div>
         </div>
       </div>
     </div>
