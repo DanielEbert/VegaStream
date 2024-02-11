@@ -201,7 +201,7 @@ function TimestampControl({
             {convertMilliseconds(selectedTimestamp[0])}
           </span>
         </Tooltip>
-        <span>&nbsp; {'-'} &nbsp;</span>
+        <span className="select-none">&nbsp; {'-'} &nbsp;</span>
         <Tooltip tooltip={convertToMilliseconds(textInputTimestamp) + ' ms'}>
           <input
             min={minTimestamp}
@@ -219,7 +219,7 @@ function TimestampControl({
             className="bg-gray-50 px-1 border border-gray-300 rounded-lg outline-none  focus:border-blue-500"
           />
         </Tooltip>
-        <span>&nbsp; {'/'} &nbsp;</span>
+        <span className="select-none">&nbsp; {'/'} &nbsp;</span>
         <Tooltip tooltip={maxTimestamp + ' ms'}>
           <span className="select-none">
             {convertMilliseconds(maxTimestamp)}
