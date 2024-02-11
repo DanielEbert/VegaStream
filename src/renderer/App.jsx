@@ -18,6 +18,7 @@ import { FiPlay } from 'react-icons/fi';
 import { FiPauseCircle } from 'react-icons/fi';
 import { IconButton } from './ui/IconButton';
 import { convertMilliseconds, convertToMilliseconds } from './util';
+import { Tooltip } from './ui/Tooltip';
 
 let counter = 0;
 
@@ -90,12 +91,14 @@ function VegaPlot({ connected }) {
   );
 }
 
-function Main({ connected }) {
-  console.log('render Main');
+function TimestampControl({
+  minTimestamp,
+  maxTimestamp,
+  selectedTimestamp,
+  setSelectedTimestamp,
+}) {
+  console.log('render Timestamp Control');
 
-  const [minTimestamp] = useState(0);
-  const [maxTimestamp] = useState(100000);
-  const [selectedTimestamp, setSelectedTimestamp] = useState([10000, 45000]);
   const [textInputTimestamp, setTextInputTimestamp] = useState('');
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -136,6 +139,7 @@ function Main({ connected }) {
     setTextInputTimestamp(convertMilliseconds(selectedTimestamp[1]));
   }, [selectedTimestamp]);
 
+  // TODO: stop playing on reaching max
   useEffect(() => {
     if (!isPlaying) return;
     const interval = setInterval(() => {
@@ -145,95 +149,103 @@ function Main({ connected }) {
     return () => clearInterval(interval);
   }, [isPlaying]);
 
-  // TODO: put all timestamp control in separate function
+  return (
+    <div className="m-10">
+      <div className="pb-2">
+        <RangeSlider
+          min={minTimestamp}
+          max={maxTimestamp}
+          step={10}
+          value={selectedTimestamp}
+          onInput={(value, userInteraction) => {
+            setSelectedTimestamp(value);
+          }}
+        />
+      </div>
+      <div className="flex">
+        <IconButton
+          Icon={FiChevronsLeft}
+          size={24}
+          label={'-1 Sec'}
+          onClick={() => changeTimestamp(-1000)}
+        />
+        <IconButton
+          Icon={FiChevronLeft}
+          size={24}
+          label={'-100 Ms'}
+          onClick={() => changeTimestamp(-100)}
+        />
+        <IconButton
+          Icon={isPlaying ? FiPause : FiPlay}
+          size={24}
+          label={isPlaying ? 'Pause' : 'Play'}
+          onClick={() => {
+            setIsPlaying((prev) => !prev);
+          }}
+        />
+        <IconButton
+          Icon={FiChevronRight}
+          size={24}
+          label={'+100 Ms'}
+          onClick={() => changeTimestamp(100)}
+        />
+        <IconButton
+          Icon={FiChevronsRight}
+          size={24}
+          label={'+1 Sec'}
+          onClick={() => changeTimestamp(1000)}
+        />
+        <div className="ml-5" />
+        <Tooltip tooltip={selectedTimestamp[0] + ' ms'}>
+          <span className="select-none">
+            {convertMilliseconds(selectedTimestamp[0])}
+          </span>
+        </Tooltip>
+        <span>&nbsp; {'-'} &nbsp;</span>
+        <Tooltip tooltip={convertToMilliseconds(textInputTimestamp) + ' ms'}>
+          <input
+            min={minTimestamp}
+            max={maxTimestamp}
+            value={textInputTimestamp}
+            onChange={(e) => {
+              setTextInputTimestamp(e.target.value);
+            }}
+            onKeyDown={(e) =>
+              e.key === 'Enter' &&
+              handleFinalizeTimestampTextInput(e.target.value)
+            }
+            onBlur={(e) => handleFinalizeTimestampTextInput(e.target.value)}
+            size={9}
+            className="bg-gray-50 px-1 border border-gray-300 rounded-lg outline-none  focus:border-blue-500"
+          />
+        </Tooltip>
+        <span>&nbsp; {'/'} &nbsp;</span>
+        <Tooltip tooltip={maxTimestamp + ' ms'}>
+          <span className="select-none">
+            {convertMilliseconds(maxTimestamp)}
+          </span>
+        </Tooltip>
+      </div>
+    </div>
+  );
+}
+
+function Main({ connected }) {
+  console.log('render Main');
+
+  const [minTimestamp] = useState(0);
+  const [maxTimestamp] = useState(100000);
+  const [selectedTimestamp, setSelectedTimestamp] = useState([10000, 45000]);
+
   return (
     <div className="min-h-screen w-full min-w-full prose flex flex-col">
       <VegaPlot connected={connected} />
-      <div className="m-10">
-        <div className="pb-2">
-          <RangeSlider
-            min={minTimestamp}
-            max={maxTimestamp}
-            step={10}
-            value={selectedTimestamp}
-            onInput={(value, userInteraction) => {
-              setSelectedTimestamp(value);
-            }}
-          />
-        </div>
-        <div className="flex">
-          <IconButton
-            Icon={FiChevronsLeft}
-            size={24}
-            label={'-1 Sec'}
-            onClick={() => changeTimestamp(-1000)}
-          />
-          <IconButton
-            Icon={FiChevronLeft}
-            size={24}
-            label={'-100 Ms'}
-            onClick={() => changeTimestamp(-100)}
-          />
-          <IconButton
-            Icon={isPlaying ? FiPause : FiPlay}
-            size={24}
-            label={isPlaying ? 'Pause' : 'Play'}
-            onClick={() => {
-              setIsPlaying((prev) => !prev);
-            }}
-          />
-          <IconButton
-            Icon={FiChevronRight}
-            size={24}
-            label={'+100 Ms'}
-            onClick={() => changeTimestamp(100)}
-          />
-          <IconButton
-            Icon={FiChevronsRight}
-            size={24}
-            label={'+1 Sec'}
-            onClick={() => changeTimestamp(1000)}
-          />
-          <div className="ml-5 group relative justify-center flex">
-            <span className="hidden group-hover:block absolute -top-10 whitespace-nowrap">
-              {selectedTimestamp[0] + " ms"}
-            </span>
-            <span className="select-none">
-              {convertMilliseconds(selectedTimestamp[0])}
-            </span>
-          </div>
-          <span>&nbsp; {'-'} &nbsp;</span>
-          <div className="group relative justify-center flex">
-            <span className="hidden group-hover:block absolute -top-10 whitespace-nowrap">
-              {convertToMilliseconds(textInputTimestamp) + " ms"}
-            </span>
-            <input
-              min={minTimestamp}
-              max={maxTimestamp}
-              value={textInputTimestamp}
-              onChange={(e) => {
-                setTextInputTimestamp(e.target.value);
-              }}
-              onKeyDown={(e) =>
-                e.key === 'Enter' &&
-                handleFinalizeTimestampTextInput(e.target.value)
-              }
-              onBlur={(e) => handleFinalizeTimestampTextInput(e.target.value)}
-              size={9}
-              className="bg-gray-50 px-1 border border-gray-300 rounded-lg outline-none  focus:border-blue-500"
-            />
-          </div>
-          <span>&nbsp; {'/'} &nbsp;</span>
-          <div className="group relative justify-center flex">
-            <span className="hidden group-hover:block absolute -top-10 whitespace-nowrap">
-              {maxTimestamp + " ms"}
-            </span>
-            <span className="select-none">
-              {convertMilliseconds(maxTimestamp)}
-            </span>
-          </div>
-        </div>
-      </div>
+      <TimestampControl
+        minTimestamp={minTimestamp}
+        maxTimestamp={maxTimestamp}
+        selectedTimestamp={selectedTimestamp}
+        setSelectedTimestamp={setSelectedTimestamp}
+      />
     </div>
   );
 }
