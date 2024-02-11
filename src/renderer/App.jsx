@@ -216,7 +216,7 @@ function TimestampControl({
             }
             onBlur={(e) => handleFinalizeTimestampTextInput(e.target.value)}
             size={9}
-            className="bg-gray-50 px-1 border border-gray-300 rounded-lg outline-none  focus:border-blue-500"
+            className="bg-gray-50 text-center border border-gray-300 rounded-lg outline-none  focus:border-blue-500"
           />
         </Tooltip>
         <span className="select-none">&nbsp; {'/'} &nbsp;</span>
