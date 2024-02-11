@@ -82,7 +82,7 @@ def main() -> int:
                 # TODO: later get new data from queue, check if anyone needs it, and send only to that person
                 sio.emit('newData', json.dumps([{ 'x': random.uniform(0, 10), 'y': random.uniform(0, 10), 't': sid_data['next_t']}]), room=sid)
                 sid_data['next_t'] += 1
-            eventlet.sleep(0.03)
+            eventlet.sleep(1)
 
     app = socketio.WSGIApp(sio)
     eventlet.spawn(send_new_data)
