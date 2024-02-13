@@ -16,7 +16,8 @@ spec = {
                 "data":{"name":"source"},
                 "encoding": {
                     "x":{"field":"x","type":"quantitative"},
-                    "y":{"field":"y","type":"quantitative"}
+                    "y":{"field":"y","type":"quantitative"},
+                    "tooltip": {"field":"t","type":"quantitative"}
                 },
                 "mark":{"type":"point"},
                 "name":"view_15",
@@ -80,9 +81,9 @@ def main() -> int:
         while True:
             for sid, sid_data in client_ids.items():
                 # TODO: later get new data from queue, check if anyone needs it, and send only to that person
-                sio.emit('newData', json.dumps([{ 'x': random.uniform(0, 10), 'y': random.uniform(0, 10), 't': sid_data['next_t']}]), room=sid)
+                sio.emit('newData', json.dumps([{ 'x': random.randint(0, 5), 'y': random.randint(0, 5), 't': sid_data['next_t']}]), room=sid)
                 sid_data['next_t'] += 1
-            eventlet.sleep(1)
+            eventlet.sleep(0.03)
 
     app = socketio.WSGIApp(sio)
     eventlet.spawn(send_new_data)

@@ -7,7 +7,7 @@ import React, {
   useEffect,
   useCallback,
 } from 'react';
-import embed from 'vega-embed';
+import embed, { vega } from 'vega-embed';
 import { socket } from './socket';
 import RangeSlider from './RangeSlider';
 import { FiChevronsRight, FiPause } from 'react-icons/fi';
@@ -37,8 +37,45 @@ function VegaPlot({ connected }) {
     counter++;
 
     // TODO: signal info must also be passed via update
-    view.signal('filterStart', counter - 5);
-    await view.insert('source', newData).run();
+    // view.signal('filterStart', counter - 5);
+
+    // TODO: for floats. but how slow is float calcs?
+    //function createHashKey(float1, float2) {
+    //  // Constants for hashing; adjust as needed for your precision requirements
+    //  const scale1 = 1000000; // Scale factor for the first float
+    //  const scale2 = 100; // Scale factor for adjusting the second float before adding to the hash
+
+    //  // Creating a hash key
+    //  // Note: This is a simple example and may need adjustments based on your precision and collision avoidance needs
+    //  let key = Math.floor(float1 * scale1 + float2 * scale2);
+
+    //  return key;
+    //}
+
+    const createKey = (a, b) => {
+      // TODO: real impl won't work like this, as its floats and can be negative. just use simple hash
+      return (a << 16) + b;
+    };
+
+    const sourceDataset = view.data('source');
+    //console.log('len ' + sourceDataset.length);
+
+    let sourceDatasetLookup = {};
+    sourceDataset.forEach((e) => {
+      sourceDatasetLookup[createKey(e.x, e.y)] = e;
+    });
+
+    let vegaChangset = vega.changeset();
+
+    newData.forEach((e) => {
+      const newDataElemKey = createKey(e.x, e.y);
+      if (newDataElemKey in sourceDatasetLookup) {
+        //console.log('is in ' + e.x + ' ' + e.y + ' ' + e.t);
+        vegaChangset.modify(sourceDatasetLookup[newDataElemKey], 't', e.t);
+      }
+    });
+
+    await view.change('source', vegaChangset).run();
   }, []);
 
   useEffect(() => {
