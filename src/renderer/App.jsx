@@ -8,7 +8,7 @@ import React, {
   useCallback,
 } from 'react';
 import embed, { vega } from 'vega-embed';
-import { socket } from './socket';
+// import { socket } from './socket';
 import RangeSlider from './RangeSlider';
 import { FiChevronsRight, FiPause } from 'react-icons/fi';
 import { FiChevronRight } from 'react-icons/fi';
@@ -19,8 +19,10 @@ import { FiPauseCircle } from 'react-icons/fi';
 import { IconButton } from './ui/IconButton';
 import { convertMilliseconds, convertToMilliseconds } from './util';
 import { Tooltip } from './ui/Tooltip';
+import { unpack } from 'msgpackr';
 
 let counter = 0;
+let start_time = 0;
 
 function VegaPlot({ connected }) {
   console.log('onrender');
@@ -34,7 +36,16 @@ function VegaPlot({ connected }) {
     const view = viewRef.current;
     if (view == null || paused == true) return;
 
+    // console.log(newData);
+
+    if (counter == 0) {
+      start_time = Date.now();
+    }
     counter++;
+    if (counter % 10000 == 1) {
+      console.log('recv ' + counter);
+      console.log(Date.now() - start_time);
+    }
 
     // TODO: signal info must also be passed via update
     // view.signal('filterStart', counter - 5);
@@ -52,30 +63,31 @@ function VegaPlot({ connected }) {
     //  return key;
     //}
 
-    const createKey = (a, b) => {
-      // TODO: real impl won't work like this, as its floats and can be negative. just use simple hash
-      return (a << 16) + b;
-    };
+    // const createKey = (a, b) => {
+    //   // TODO: real impl won't work like this, as its floats and can be negative. just use simple hash
+    //   return (a << 16) + b;
+    // };
 
-    const sourceDataset = view.data('source');
-    //console.log('len ' + sourceDataset.length);
+    // const sourceDataset = view.data('source');
+    // //console.log('len ' + sourceDataset.length);
 
-    let sourceDatasetLookup = {};
-    sourceDataset.forEach((e) => {
-      sourceDatasetLookup[createKey(e.x, e.y)] = e;
-    });
+    // let sourceDatasetLookup = {};
+    // sourceDataset.forEach((e) => {
+    //   sourceDatasetLookup[createKey(e.x, e.y)] = e;
+    // });
 
-    let vegaChangset = vega.changeset();
+    // let vegaChangset = vega.changeset();
 
-    newData.forEach((e) => {
-      const newDataElemKey = createKey(e.x, e.y);
-      if (newDataElemKey in sourceDatasetLookup) {
-        //console.log('is in ' + e.x + ' ' + e.y + ' ' + e.t);
-        vegaChangset.modify(sourceDatasetLookup[newDataElemKey], 't', e.t);
-      }
-    });
+    // newData.forEach((e) => {
+    //   const newDataElemKey = createKey(e.x, e.y);
+    //   if (newDataElemKey in sourceDatasetLookup) {
+    //     //console.log('is in ' + e.x + ' ' + e.y + ' ' + e.t);
+    //     vegaChangset.modify(sourceDatasetLookup[newDataElemKey], 't', e.t);
+    //   }
+    // });
 
-    await view.change('source', vegaChangset).run();
+    // await view.change('source', vegaChangset).run();
+    // await view.insert('source', newData); // .run();
   }, []);
 
   useEffect(() => {
@@ -97,28 +109,46 @@ function VegaPlot({ connected }) {
   }, [specAndData]);
 
   useEffect(() => {
-    if (!connected) return;
-
-    function onNewData(data) {
-      updateData(JSON.parse(data));
-    }
-
-    socket.emit(
-      'register_for_plot',
-      ('features', { config: 0 }),
-      (response_str) => {
-        const response = JSON.parse(response_str);
-        setSpecAndData({ spec: response.spec, data: response.initial_data });
+    let recvCount = 0;
+    const ws = new WebSocket('ws://localhost:8000');
+    ws.addEventListener('message', (event) => {
+      recvCount += 1;
+      if (recvCount % 10000 == 1) {
+        console.log(recvCount);
       }
-    );
+    });
+    //ws.onmessage = ({ data }) => {
+    //  // console.log(data);
+    //  recvCount += 1;
+    //  if (recvCount % 10000 == 1) {
+    //    console.log(recvCount);
+    //  }
+    //};
+  }, []);
 
-    socket.on('newData', onNewData);
+  // useEffect(() => {
+  //   if (!connected) return;
 
-    return () => {
-      if (!connected) return;
-      socket.off('newData', onNewData);
-    };
-  }, [connected]);
+  //   function onNewData(data) {
+  //     updateData(unpack(data));
+  //   }
+
+  //   socket.emit(
+  //     'register_for_plot',
+  //     ('features', { config: 0 }),
+  //     (response_str) => {
+  //       const response = JSON.parse(response_str);
+  //       setSpecAndData({ spec: response.spec, data: response.initial_data });
+  //     }
+  //   );
+
+  //   socket.on('newData', onNewData);
+
+  //   return () => {
+  //     if (!connected) return;
+  //     socket.off('newData', onNewData);
+  //   };
+  // }, [connected]);
 
   return (
     <div>
@@ -288,24 +318,24 @@ function Main({ connected }) {
 }
 
 export default function App() {
-  const [isConnected, setIsConnected] = useState(socket.connected);
+  const [isConnected, setIsConnected] = useState(false); //socket.connected);
 
-  useEffect(() => {
-    function onConnect() {
-      setIsConnected(true);
-    }
-    function onDisconnect() {
-      setIsConnected(false);
-    }
+  // useEffect(() => {
+  //   function onConnect() {
+  //     setIsConnected(true);
+  //   }
+  //   function onDisconnect() {
+  //     setIsConnected(false);
+  //   }
 
-    socket.on('connect', onConnect);
-    socket.on('disconnect', onDisconnect);
+  //   socket.on('connect', onConnect);
+  //   socket.on('disconnect', onDisconnect);
 
-    return () => {
-      socket.off('connect', onConnect);
-      socket.off('disconnect', onDisconnect);
-    };
-  }, []);
+  //   return () => {
+  //     socket.off('connect', onConnect);
+  //     socket.off('disconnect', onDisconnect);
+  //   };
+  // }, []);
 
   return (
     <Router>
