@@ -129,6 +129,7 @@ function VegaPlot({ connected }) {
     const onResize = () => {
       // console.log('res');
       if (viewRef.current) {
+        // TODO: add max X updates every second. use a hook for it if possible
         viewRef.current.resize();
       }
     };
@@ -141,7 +142,7 @@ function VegaPlot({ connected }) {
   return (
     <div>
       <button onClick={() => setPaused((prev) => !prev)}>Pause</button>
-      <div className="w-full h-full">
+      <div className="w-[100%] h-[100%]">
         <div className="aspect-square">
           <div className="w-[40%] h-[40%]" ref={ref} />
         </div>
@@ -297,7 +298,7 @@ function Main({ connected }) {
   const [selectedTimestamp, setSelectedTimestamp] = useState([10000, 45000]);
 
   return (
-    <div className="min-h-screen w-full min-w-full prose flex flex-col">
+    <div className="w-[98vw] h-screen prose flex flex-col">
       <VegaPlot connected={connected} />
       <TimestampControl
         minTimestamp={minTimestamp}
