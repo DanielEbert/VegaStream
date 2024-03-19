@@ -125,10 +125,23 @@ function VegaPlot({ connected }) {
     };
   }, [connected]);
 
+  useEffect(() => {
+    const onResize = () => {
+      // console.log('res');
+      if (viewRef.current) {
+        viewRef.current.resize();
+      }
+    };
+    window.addEventListener('resize', onResize);
+    return () => {
+      window.removeEventListener('resize', onResize);
+    };
+  }, []);
+
   return (
     <div>
       <button onClick={() => setPaused((prev) => !prev)}>Pause</button>
-      <div className="w-screen h-screen">
+      <div className="w-full h-full">
         <div className="aspect-square">
           <div className="w-[40%] h-[40%]" ref={ref} />
         </div>
