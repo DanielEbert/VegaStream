@@ -7,21 +7,13 @@ import random
 
 spec = {
     "$schema": "https://vega.github.io/schema/vega-lite/v5.15.1.json",
-                "autosize": {
-                    "type": "fit",
-                    "contains": "padding"
-                },
         # "width": "800",
         # "height": "800",
         # "height": "container",
         "hconcat": [
             {
-                "height": "container",
-                "width": "container",
-                "autosize": {
-                    "type": "fit",
-                    "contains": "padding"
-                },
+                "height": 200,
+                "width": 200,
                 "data":{"name":"source"},
                 "encoding": {
                     "x":{"field":"x","type":"quantitative"},
@@ -35,10 +27,6 @@ spec = {
             {
                 "height": "container",
                 "width": "container",
-                "autosize": {
-                    "type": "fit",
-                    "contains": "padding"
-                },
                 "data":{"name":"source"},
                 "encoding": {
                     "x":{"field":"x","type":"quantitative"},
