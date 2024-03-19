@@ -7,11 +7,10 @@ import random
 
 spec = {
     "$schema": "https://vega.github.io/schema/vega-lite/v5.15.1.json",
-    "config": {
-        "view":
-            {"continuousHeight":500,"continuousWidth":500}
-        },
-        "layer": [
+        # "width": "800",
+        # "height": "800",
+        # "height": "container",
+        "hconcat": [
             {
                 "data":{"name":"source"},
                 "encoding": {
@@ -24,14 +23,27 @@ spec = {
                 "transform":[{"filter":"datum.t >= filterStart"}]
             },
             {
-                "data":{"name":"sourceb"},
-                "encoding":{
-                    "x":{"field":"a","type":"quantitative"},
-                    "y":{"field":"b","type":"quantitative","scale":{"domain":[0,{"expr":"domainWidth"}]}}
+                "height": "container",
+                "width": "container",
+                "data":{"name":"source"},
+                "encoding": {
+                    "x":{"field":"x","type":"quantitative"},
+                    "y":{"field":"y","type":"quantitative"},
+                    "tooltip": {"field":"t","type":"quantitative"}
                 },
-                "mark":{"color":"red","type":"point"},
-                "name":"view_16"
-            }
+                "mark":{"type":"point"},
+                "name":"view_16",
+                "transform":[{"filter":"datum.t >= filterStart"}]
+            },
+            # {
+            #     "data":{"name":"sourceb"},
+            #     "encoding":{
+            #         "x":{"field":"a","type":"quantitative"},
+            #         "y":{"field":"b","type":"quantitative","scale":{"domain":[0,{"expr":"domainWidth"}]}}
+            #     },
+            #     "mark":{"color":"red","type":"point"},
+            #     "name":"view_16"
+            # }
         ],
         "params":[
             {

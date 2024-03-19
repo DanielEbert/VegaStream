@@ -84,7 +84,12 @@ function VegaPlot({ connected }) {
     embed(ref.current, specAndData.spec, { actions: false }).then(
       ({ view }) => {
         viewRef.current = view;
+        view.addEventListener('click', (event, item) => {
+          console.log('clicked', item.datum);
+        });
         counter = 0;
+        // view.width(600);
+        // view.width(1);
         view.insert('source', specAndData.data).run();
       }
     );
@@ -123,7 +128,11 @@ function VegaPlot({ connected }) {
   return (
     <div>
       <button onClick={() => setPaused((prev) => !prev)}>Pause</button>
-      <div ref={ref} />
+      <div className="w-screen h-screen">
+        <div className="aspect-square">
+          <div className="w-[40%] h-[40%]" ref={ref} />
+        </div>
+      </div>
     </div>
   );
 }
