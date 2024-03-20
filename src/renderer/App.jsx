@@ -19,6 +19,7 @@ import { FiPauseCircle } from 'react-icons/fi';
 import { IconButton } from './ui/IconButton';
 import { convertMilliseconds, convertToMilliseconds } from './util';
 import { Tooltip } from './ui/Tooltip';
+import { FaMagnifyingGlass } from 'react-icons/fa6';
 
 let counter = 0;
 
@@ -140,8 +141,16 @@ function VegaPlot({ connected }) {
   }, []);
 
   return (
-    <div>
-      <button onClick={() => setPaused((prev) => !prev)}>Pause</button>
+    <div className="w-full bg-white m-2 rounded-lg border border-[#DDDDDD]">
+      <div className="w-full h-10 flex justify-between">
+        <div className="mx-3 my-2 text-2xl flex flex-row space-x-2 items-baseline">
+          <FaMagnifyingGlass size={18} />
+          <div>Detections</div>
+        </div>
+        <div className="mx-3 mt-1 mb-3 text-opacity-50 text-black">
+          17:12:55
+        </div>
+      </div>
       <div className="w-[100%] h-[100%]">
         <div className="aspect-square">
           <div className="w-[40%] h-[40%]" ref={ref} />
@@ -307,18 +316,20 @@ function Main({ connected }) {
   const divClassBase = 'flex w-full h-full';
 
   const divClass = {
-    1: `${divClassBase} bg-blue-500`,
-    '2v': `${divClassBase} bg-blue-500 flex-1`,
-    '2h': `${divClassBase} bg-blue-500 flex-1`,
-    4: `${divClassBase} bg-blue-500`,
+    1: `${divClassBase}`,
+    '2v': `${divClassBase} flex-1`,
+    '2h': `${divClassBase} flex-1`,
+    4: `${divClassBase}`,
   };
 
-  const layout = '4';
+  const layout = '2v';
 
   return (
-    <div className="w-screen h-screen min-h-screen min-w-screen prose flex flex-col">
+    <div className="w-screen h-screen min-h-screen min-w-screen prose flex flex-col bg-[#F5F5F5]">
       <div className={`${layoutClassNames[layout]} flex-1`}>
-        <div className={divClass[layout]}>Div1</div>
+        <div className={divClass[layout]}>
+          <VegaPlot connected={connected} />
+        </div>
         {layout !== '1' && (
           <div className={`${divClass[layout]} bg-green-500`}>Div 2</div>
         )}

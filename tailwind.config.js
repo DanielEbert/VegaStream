@@ -7,6 +7,11 @@ module.exports = {
     fontFamily: {
       sans: ['Helvetica', 'Arial', 'sans-serif'],
     },
+    extend: {
+      colors: {
+        'bg-visu': '#F5F5F5',
+      },
+    },
   },
   variants: {},
   plugins: [],
