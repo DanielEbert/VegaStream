@@ -148,7 +148,7 @@ function VegaPlot({ connected }) {
   ];
 
   return (
-    <div className="w-full bg-white m-2 rounded-lg border border-[#DDDDDD]">
+    <div className="w-full bg-white m-1 rounded-lg border border-[#DDDDDD]">
       <div className="w-full h-14 flex justify-between">
         <div className="mx-3 my-2 text-2xl flex flex-row space-x-2 items-baseline">
           <Select
@@ -167,7 +167,7 @@ function VegaPlot({ connected }) {
             }}
           />
         </div>
-        <div className="mx-3 mt-1 mb-3 text-opacity-50 text-black">
+        <div className="mx-3 mt-2 mb-3 text-opacity-50 text-black">
           17:12:55
         </div>
       </div>
@@ -351,7 +351,9 @@ function Main({ connected }) {
           <VegaPlot connected={connected} />
         </div>
         {layout !== '1' && (
-          <div className={`${divClass[layout]} bg-green-500`}>Div 2</div>
+          <div className={`${divClass[layout]}`}>
+            <VegaPlot connected={connected} />
+          </div>
         )}
         {layout === '4' && (
           <div className={`${divClass[layout]} bg-red-500`}>Div 3</div>
