@@ -150,7 +150,7 @@ function VegaPlot({ connected }) {
   return (
     <div className="w-full bg-white m-2 rounded-lg border border-[#DDDDDD]">
       <div className="w-full h-14 flex justify-between">
-        <div className="mx-3 my-2 text-2xl flex flex-row space-x-2 items-baseline flex">
+        <div className="mx-3 my-2 text-2xl flex flex-row space-x-2 items-baseline">
           <Select
             options={options}
             styles={{
@@ -164,7 +164,6 @@ function VegaPlot({ connected }) {
                 border: 0,
                 boxShadow: 'none',
               }),
-              indicatorsContainer: (base) => ({ display: 'none' }),
             }}
           />
         </div>
