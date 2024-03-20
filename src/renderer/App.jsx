@@ -20,6 +20,7 @@ import { IconButton } from './ui/IconButton';
 import { convertMilliseconds, convertToMilliseconds } from './util';
 import { Tooltip } from './ui/Tooltip';
 import { FaMagnifyingGlass } from 'react-icons/fa6';
+import Select from 'react-select';
 
 let counter = 0;
 
@@ -140,12 +141,32 @@ function VegaPlot({ connected }) {
     };
   }, []);
 
+  const options = [
+    { value: 'chocolate', label: 'Chocolate' },
+    { value: 'strawberry', label: 'Strawberry' },
+    { value: 'vanilla', label: 'Vanilla' },
+  ];
+
   return (
     <div className="w-full bg-white m-2 rounded-lg border border-[#DDDDDD]">
-      <div className="w-full h-10 flex justify-between">
-        <div className="mx-3 my-2 text-2xl flex flex-row space-x-2 items-baseline">
-          <FaMagnifyingGlass size={18} />
-          <div>Detections</div>
+      <div className="w-full h-14 flex justify-between">
+        <div className="mx-3 my-2 text-2xl flex flex-row space-x-2 items-baseline flex">
+          <Select
+            options={options}
+            styles={{
+              menu: (base) => ({
+                ...base,
+                width: 'max-content',
+                minWidth: '100%',
+              }),
+              control: (base) => ({
+                ...base,
+                border: 0,
+                boxShadow: 'none',
+              }),
+              indicatorsContainer: (base) => ({ display: 'none' }),
+            }}
+          />
         </div>
         <div className="mx-3 mt-1 mb-3 text-opacity-50 text-black">
           17:12:55
