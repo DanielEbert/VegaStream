@@ -297,6 +297,55 @@ function Main({ connected }) {
   const [maxTimestamp] = useState(100000);
   const [selectedTimestamp, setSelectedTimestamp] = useState([10000, 45000]);
 
+  const layoutClassNames = {
+    1: 'flex flex-col items-center',
+    '2v': 'flex',
+    '2h': 'flex flex-col',
+    4: 'grid grid-cols-2',
+  };
+
+  const divClassBase = 'flex w-full h-full';
+
+  const divClass = {
+    1: `${divClassBase} bg-blue-500`,
+    '2v': `${divClassBase} bg-blue-500 flex-1`,
+    '2h': `${divClassBase} bg-blue-500 flex-1`,
+    4: `${divClassBase} bg-blue-500`,
+  };
+
+  const layout = '4';
+
+  return (
+    <div className="w-screen h-screen min-h-screen min-w-screen prose flex flex-col">
+      <div className={`${layoutClassNames[layout]} flex-1`}>
+        <div className={divClass[layout]}>Div1</div>
+        {layout !== '1' && (
+          <div className={`${divClass[layout]} bg-green-500`}>Div 2</div>
+        )}
+        {layout === '4' && (
+          <div className={`${divClass[layout]} bg-red-500`}>Div 3</div>
+        )}
+        {layout === '4' && (
+          <div className={`${divClass[layout]} bg-yellow-500`}>Div 4</div>
+        )}
+      </div>
+      <TimestampControl
+        minTimestamp={minTimestamp}
+        maxTimestamp={maxTimestamp}
+        selectedTimestamp={selectedTimestamp}
+        setSelectedTimestamp={setSelectedTimestamp}
+      />
+    </div>
+  );
+}
+
+function MainOrig({ connected }) {
+  console.log('render Main');
+
+  const [minTimestamp] = useState(0);
+  const [maxTimestamp] = useState(100000);
+  const [selectedTimestamp, setSelectedTimestamp] = useState([10000, 45000]);
+
   return (
     <div className="w-[98vw] h-screen prose flex flex-col">
       <VegaPlot connected={connected} />
