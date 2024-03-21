@@ -167,9 +167,7 @@ function VegaPlot({ connected }) {
             }}
           />
         </div>
-        <div className="mx-3 mt-2 mb-3 text-opacity-50 text-black">
-          17:12:55
-        </div>
+        <div className="mx-3 mt-2 text-opacity-50 text-black">17:12:55</div>
       </div>
       <div className="w-[100%] h-[100%]">
         <div className="aspect-square">
