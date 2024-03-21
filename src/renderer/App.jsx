@@ -360,26 +360,17 @@ function Main({ connected }) {
           <div className={`${divClass[layout]} bg-yellow-500`}>Div 4</div>
         )}
       </div>
-      <TimestampControl
-        minTimestamp={minTimestamp}
-        maxTimestamp={maxTimestamp}
-        selectedTimestamp={selectedTimestamp}
-        setSelectedTimestamp={setSelectedTimestamp}
-      />
-    </div>
-  );
-}
-
-function MainOrig({ connected }) {
-  console.log('render Main');
-
-  const [minTimestamp] = useState(0);
-  const [maxTimestamp] = useState(100000);
-  const [selectedTimestamp, setSelectedTimestamp] = useState([10000, 45000]);
-
-  return (
-    <div className="w-[98vw] h-screen prose flex flex-col">
-      <VegaPlot connected={connected} />
+      <div className="absolute right-2 bottom-[100px] bg-white m-1 rounded-lg border border-[#DDDDDD] w-fit p-2 space-y-2">
+        <div>
+          <FiPlay size={24} />
+        </div>
+        <div>
+          <FiPlay size={24} />
+        </div>
+        <div>
+          <FiPlay size={24} />
+        </div>
+      </div>
       <TimestampControl
         minTimestamp={minTimestamp}
         maxTimestamp={maxTimestamp}
